@@ -3475,6 +3475,7 @@ event_get_method(void)
 	return (current_base->evsel->name);
 }
 
+// 用户自定义的内存分配函数
 #ifndef EVENT__DISABLE_MM_REPLACEMENT
 static void *(*mm_malloc_fn_)(size_t sz) = NULL;
 static void *(*mm_realloc_fn_)(void *p, size_t sz) = NULL;
@@ -3567,6 +3568,7 @@ event_mm_free_(void *ptr)
 		free(ptr);
 }
 
+// 设置用户自定义内存函数
 void
 event_set_mem_functions(void *(*malloc_fn)(size_t sz),
 			void *(*realloc_fn)(void *ptr, size_t sz),

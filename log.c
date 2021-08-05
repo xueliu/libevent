@@ -192,34 +192,39 @@ event_logv_(int severity, const char *errstr, const char *fmt, va_list ap)
 	if (severity == EVENT_LOG_DEBUG && !event_debug_get_logging_mask_())
 		return;
 
+	// 如果有可变参数，就把可变参数格式化到一个缓存区buf中。
 	if (fmt != NULL)
 		evutil_vsnprintf(buf, sizeof(buf), fmt, ap);
 	else
 		buf[0] = '\0';
 
+	// 如果有额外的信息描述，把这些信息追加到可变参数的后面。
 	if (errstr) {
 		len = strlen(buf);
+		// -3是因为还有另外三个字符，冒号、空格和\0。
 		if (len < sizeof(buf) - 3) {
 			evutil_snprintf(buf + len, sizeof(buf) - len, ": %s", errstr);
 		}
 	}
 
+	//把缓存区的数据作为一条日志记录，调用Libevent的日志函数。
 	event_log(severity, buf);
 }
 
+// 一个全局函数指针变量来保存用户在日志定制函数中传入的参数cb
 static event_log_cb log_fn = NULL;
 
 void
 event_set_log_callback(event_log_cb cb)
 {
-	log_fn = cb;
+	log_fn = cb;    //设置用户的日志回调函数
 }
 
 static void
 event_log(int severity, const char *msg)
 {
 	if (log_fn)
-		log_fn(severity, msg);
+		log_fn(severity, msg); //调用用户的日志回调函数
 	else {
 		const char *severity_str;
 		switch (severity) {
@@ -239,6 +244,7 @@ event_log(int severity, const char *msg)
 			severity_str = "???";
 			break;
 		}
+		// 输出到标准错误终端上
 		(void)fprintf(stderr, "[%s] %s\n", severity_str, msg);
 	}
 }
